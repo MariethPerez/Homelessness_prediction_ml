@@ -1,0 +1,15 @@
+# Data — never upload raw client data to GitHub
+data/raw/
+data/processed/
+
+# Model artifacts — too large for GitHub
+models/
+
+# Python environment
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
