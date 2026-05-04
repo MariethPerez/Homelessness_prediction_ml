@@ -2,8 +2,8 @@
 data/raw/
 data/processed/
 
-# Model artifacts — too large for GitHub
-models/
+# # Model artifacts — too large for GitHub
+# models/
 
 # Python environment
 venv/
