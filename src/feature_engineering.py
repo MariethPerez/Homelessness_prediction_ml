@@ -1,6 +1,6 @@
 """
 feature_engineering.py — Build intake records, derive targets, encode features
-Waterloo Region Homelessness ML — PHASE A
+Waterloo Region Homelessness ML — PHASE A / PHASE B
 """
 
 import pandas as pd
@@ -10,6 +10,7 @@ from src.config import (
     INCOME_SOURCE_MAP, NO_INCOME_VALUES,
     WATERLOO_CITIES, LOCAL_GEO_VALUES,
     LEAKY_COLS, ID_COLS, PHASE_A_FEATURES, CAT_FEATURES,
+    HOUSING_TYPE_MAPPING, ADMIN_MODULES, PHASE_B_ALL_FEATURES,
 )
 
 
@@ -172,36 +173,119 @@ def _income_range(yearly):
 
 
 # ---------------------------------------------------------------------------
-# Step 4: Build full training dataset
+# Step 4 (Phase B): Build service features from first snapshot
+# ---------------------------------------------------------------------------
+
+def build_service_features(cam: pd.DataFrame) -> pd.DataFrame:
+    """
+    4 Phase B features derived from each client's first snapshot.
+
+    Returns one row per client with:
+        - last_known_housing_category : 9-category grouping of Last Known Housing Type
+        - last_known_housing_missing  : 1 if housing type is NaN or 'None Specified'
+        - first_intervention_type     : Recent Interaction Module at first snapshot
+        - days_since_last_activity    : Days Since Last Activity at first snapshot
+    """
+    first = (
+        cam.sort_values('Date')
+           .groupby('Dummy Client ID', as_index=False)
+           .first()
+    )
+
+    first['last_known_housing_category'] = (
+        first['Last Known Housing Type']
+        .map(HOUSING_TYPE_MAPPING)
+        .fillna('Unknown')
+    )
+
+    first['last_known_housing_missing'] = (
+        first['Last Known Housing Type'].isna() |
+        (first['Last Known Housing Type'] == 'None Specified')
+    ).astype(int)
+
+    first['first_intervention_type'] = (
+        first['Recent Interaction Module'].fillna('Unknown')
+    )
+
+    first['days_since_last_activity'] = first['Days Since Last Activity']
+
+    return first[['Dummy Client ID',
+                  'last_known_housing_category',
+                  'last_known_housing_missing',
+                  'first_intervention_type',
+                  'days_since_last_activity']]
+
+
+# ---------------------------------------------------------------------------
+# Step 5 (Phase B): Build what-if feature from full client history
+# ---------------------------------------------------------------------------
+
+def build_whatif_features(cam: pd.DataFrame) -> pd.DataFrame:
+    """
+    Derive first_meaningful_intervention from each client's full history.
+
+    'Meaningful' = first Recent Interaction Module that is NOT in ADMIN_MODULES
+    and is not NaN, sorted chronologically.
+
+    Returns one row per client with:
+        - first_meaningful_intervention : intervention name or 'No meaningful intervention'
+    """
+    def _first_meaningful(group):
+        mask = (
+            ~group['Recent Interaction Module'].isin(ADMIN_MODULES) &
+            group['Recent Interaction Module'].notna()
+        )
+        meaningful = group[mask].sort_values('Date')
+        if len(meaningful) > 0:
+            return meaningful.iloc[0]['Recent Interaction Module']
+        return 'No meaningful intervention'
+
+    result = (
+        cam.groupby('Dummy Client ID')
+           .apply(_first_meaningful)
+           .reset_index()
+    )
+    result.columns = ['Dummy Client ID', 'first_meaningful_intervention']
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Step 6: Build full training dataset (Phase A + Phase B)
 # ---------------------------------------------------------------------------
 
 def build_training_dataset(cam: pd.DataFrame) -> pd.DataFrame:
     """
-    Full pipeline: targets + intake record + encoded features.
+    Full pipeline: targets + intake record + encoded features + service features.
 
     Returns one row per client (9,576 expected) with:
         - ID / reference columns (kept for auditing)
-        - Encoded Phase A features
+        - Encoded Phase A + Phase B features (23 total)
         - Target: became_chronic
     """
     targets  = derive_targets(cam)
     intake   = build_intake_record(cam)
     intake   = encode_features(intake)
+    service  = build_service_features(cam)
 
-    # Join targets onto intake
     training_df = intake.merge(targets, on='Dummy Client ID', how='left')
+    training_df = training_df.merge(service, on='Dummy Client ID', how='left')
 
     print(f"\nTraining dataset: {training_df.shape[0]:,} rows x {training_df.shape[1]} cols")
     print(f"Phase A features available: {sum(f in training_df.columns for f in PHASE_A_FEATURES)}/{len(PHASE_A_FEATURES)}")
+    print(f"Phase B features available: {sum(f in training_df.columns for f in PHASE_B_ALL_FEATURES)}/{len(PHASE_B_ALL_FEATURES)}")
     return training_df
 
 
-def get_X_y(training_df: pd.DataFrame):
+def get_X_y(training_df: pd.DataFrame, features=None):
     """
     Split training dataset into feature matrix X and target vector y.
     Categorical columns are cast to pandas 'category' dtype as required by LightGBM >= 4.0.
+
+    features: list of feature names to use (defaults to PHASE_B_ALL_FEATURES = 23 features)
     """
-    X = training_df[PHASE_A_FEATURES].copy()
+    if features is None:
+        features = PHASE_B_ALL_FEATURES
+    X = training_df[features].copy()
     y = training_df['became_chronic'].copy()
     for col in CAT_FEATURES:
         if col in X.columns:

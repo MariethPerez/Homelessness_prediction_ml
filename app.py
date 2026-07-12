@@ -1,6 +1,6 @@
 """
 app.py — Streamlit demo app for Waterloo Homelessness Risk Prediction
-Phase A Baseline Model
+Phase A/B Model — includes Simulate Intervention (What-if)
 """
 
 import sys
@@ -13,7 +13,7 @@ import joblib
 import glob
 from datetime import date
 
-from src.config import PHASE_A_FEATURES, CAT_FEATURES
+from src.config import PHASE_A_FEATURES, PHASE_B_ALL_FEATURES, CAT_FEATURES
 
 # ---------------------------------------------------------------------------
 # Page config
@@ -25,20 +25,39 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------------------------
-# Load model
+# Load models
 # ---------------------------------------------------------------------------
 @st.cache_resource
-def load_model():
-    model_files = sorted(glob.glob('models/phase_a_baseline_*.pkl'))
-    if not model_files:
-        st.error("No model found in models/ folder.")
+def load_models():
+    # Model 1 (Phase B preferred, fallback to Phase A)
+    m1_files = sorted(glob.glob('models/phase_b_model1_*.pkl'))
+    if not m1_files:
+        m1_files = sorted(glob.glob('models/phase_a_baseline_*.pkl'))
+    if not m1_files:
+        st.error("No Model 1 found in models/ folder.")
         st.stop()
-    artifact = joblib.load(model_files[-1])
-    return artifact['model']
+    model_1 = joblib.load(m1_files[-1])['model']
 
-model = load_model()
+    # Model What-if (optional — disables simulation if not found)
+    wif_files = sorted(glob.glob('models/phase_b_whatif_*.pkl'))
+    model_whatif = joblib.load(wif_files[-1])['model'] if wif_files else None
 
-THRESHOLD = 0.20
+    return model_1, model_whatif
+
+model_1, model_whatif = load_models()
+
+THRESHOLD = 0.32
+
+WHATIF_CONFIDENCE = {
+    'Goods and Services' : ('🟢', 'High confidence (5,063 historical cases)'),
+    'Case Management'    : ('🟢', 'High confidence (1,104 historical cases)'),
+    'Group Activities'   : ('🟢', 'High confidence (1,031 historical cases)'),
+    'Service Restrictions': ('🟡', 'Medium confidence (103 historical cases)'),
+    'SPDAT'              : ('🟡', 'Medium confidence (88 historical cases)'),
+    'Housing Placement'  : ('🔴', 'Low confidence — few historical cases (47)'),
+    'Follow Ups'         : ('🔴', 'Low confidence — few historical cases (14)'),
+    'Housing Retention'  : ('🔴', 'Low confidence — few historical cases (12)'),
+}
 
 # ---------------------------------------------------------------------------
 # Income source options
@@ -82,7 +101,7 @@ INCOME_SOURCES = [
 # UI
 # ---------------------------------------------------------------------------
 st.title("🏠 Homelessness Risk Assessment Tool")
-st.caption("Waterloo Region — Phase A Baseline Model")
+st.caption("Waterloo Region — Phase A/B Model")
 st.markdown(
     "> ⚠️ **This tool informs, it does not decide.** "
     "The caseworker's judgment always takes precedence."
@@ -206,43 +225,110 @@ with col3:
 
 st.divider()
 
+# --- Section 5: Service Information (Phase B) ---
+st.subheader("🏘️ Service Information")
+
+col1, col2 = st.columns(2)
+with col1:
+    housing_category = st.selectbox(
+        "Last Known Housing Type",
+        options=[
+            'Unknown',
+            'Emergency Shelter',
+            'Cambridge Shelter',
+            'Street/Encampment',
+            'Motel',
+            'Couch Surfing/Family',
+            'Transitional Housing',
+            'Stable Housing',
+            'Institutional',
+        ],
+        help="Grouped housing category at first snapshot."
+    )
+with col2:
+    first_intervention = st.selectbox(
+        "First Interaction Module (at intake)",
+        options=[
+            'Unknown',
+            'Admissions',
+            'Goods and Services',
+            'Group Activities',
+            'Case Management',
+            'Client Details',
+            'SPDAT',
+            'Service Restrictions',
+            'Housing Placement',
+            'Follow Ups / Housing Retention',
+        ],
+        help="Recent Interaction Module recorded at the client's first snapshot."
+    )
+
+days_since_activity = st.number_input(
+    "Days Since Last Activity",
+    min_value=0, max_value=3650, value=30,
+    help="Days Since Last Activity at first snapshot. Leave at 30 if unknown."
+)
+
+last_known_housing_missing = 1 if housing_category == 'Unknown' else 0
+
+st.divider()
+
 # ---------------------------------------------------------------------------
 # Predict
 # ---------------------------------------------------------------------------
 if st.button("Calculate Risk", type="primary", use_container_width=True):
 
     input_data = pd.DataFrame([{
-        'entry_year'                : entry_year,
-        'entry_season'              : entry_season,
-        'days_before_first_snapshot': days_before_first_snapshot,
-        'age'                       : age,
-        'gender'                    : gender,
-        'indigenous_status'         : indigenous_status,
-        'veteran_status'            : veteran_status,
-        'immigration_status'        : immigration_status,
-        'household_type'            : household_type,
-        'has_income'                : has_income,
-        'income_source'             : income_source_val,
-        'income_source_missing'     : income_source_missing,
-        'yearly_income'             : yearly_income if not yearly_income_missing else np.nan,
-        'yearly_income_missing'     : yearly_income_missing,
-        'annual_income_range'       : annual_income_range,
-        'has_very_low_income'       : has_very_low_income,
-        'tri_morbidity'             : int(tri_morbidity),
-        'returned_from_housing'     : int(returned_from_housing),
-        'first_homeless_episode'    : int(first_homeless_episode),
+        'entry_year'                  : entry_year,
+        'entry_season'                : entry_season,
+        'days_before_first_snapshot'  : days_before_first_snapshot,
+        'age'                         : age,
+        'gender'                      : gender,
+        'indigenous_status'           : indigenous_status,
+        'veteran_status'              : veteran_status,
+        'immigration_status'          : immigration_status,
+        'household_type'              : household_type,
+        'has_income'                  : has_income,
+        'income_source'               : income_source_val,
+        'income_source_missing'       : income_source_missing,
+        'yearly_income'               : yearly_income if not yearly_income_missing else np.nan,
+        'yearly_income_missing'       : yearly_income_missing,
+        'annual_income_range'         : annual_income_range,
+        'has_very_low_income'         : has_very_low_income,
+        'tri_morbidity'               : int(tri_morbidity),
+        'returned_from_housing'       : int(returned_from_housing),
+        'first_homeless_episode'      : int(first_homeless_episode),
+        # Phase B features
+        'last_known_housing_category' : housing_category,
+        'last_known_housing_missing'  : last_known_housing_missing,
+        'first_intervention_type'     : first_intervention,
+        'days_since_last_activity'    : days_since_activity,
     }])
 
-    # Cast categoricals
     for col in CAT_FEATURES:
         if col in input_data.columns:
             input_data[col] = input_data[col].astype('category')
 
-    # Predict
-    proba = model.predict_proba(input_data[PHASE_A_FEATURES])[0][1]
-    is_risk = proba >= THRESHOLD
+    feature_cols = PHASE_B_ALL_FEATURES if all(f in input_data.columns for f in PHASE_B_ALL_FEATURES) else PHASE_A_FEATURES
+    proba = model_1.predict_proba(input_data[feature_cols])[0][1]
 
-    # Display result
+    # Store in session_state so results persist when dropdown changes
+    st.session_state['proba']        = proba
+    st.session_state['input_data']   = input_data
+    st.session_state['feature_cols'] = feature_cols
+    st.session_state['age']          = age
+    st.session_state['indigenous_status'] = indigenous_status
+
+# ---------------------------------------------------------------------------
+# Display results (outside button block — persists across reruns)
+# ---------------------------------------------------------------------------
+if 'proba' in st.session_state:
+    proba            = st.session_state['proba']
+    input_data       = st.session_state['input_data']
+    feature_cols     = st.session_state['feature_cols']
+    age              = st.session_state['age']
+    indigenous_status = st.session_state['indigenous_status']
+
     st.divider()
     st.subheader("Assessment Result")
 
@@ -276,12 +362,78 @@ if st.button("Calculate Risk", type="primary", use_container_width=True):
 
     st.divider()
     st.caption(
-        "⚠️ This score is based on demographic information only (Phase A model). "
-        "It reflects historical patterns and does not determine individual outcomes. "
+        "⚠️ This score reflects historical patterns and does not determine individual outcomes. "
         "The caseworker's professional judgment always takes precedence."
     )
+    if age < 25:
+        st.warning(
+            "⚠️ **Cliente joven (<25 años):** El modelo tiene menor precisión para este grupo "
+            "(recall 55% vs 88% en adultos). Se recomienda revisión manual independiente del score."
+        )
     if indigenous_status == 'Indigenous':
         st.caption(
             "ℹ️ Note: Higher chronic rates among Indigenous clients reflect systemic inequity, "
             "not individual risk factors."
         )
+
+    # -----------------------------------------------------------------------
+    # Simulate Intervention (What-if)
+    # -----------------------------------------------------------------------
+    st.divider()
+    st.subheader("🔄 Simulate Intervention")
+    st.caption(
+        "Select a planned intervention to estimate how the risk score might change. "
+        "This uses a separate model trained on full client histories."
+    )
+
+    if model_whatif is None:
+        st.info("What-if model not found. Run notebooks/05_whatif_model.ipynb to enable this feature.")
+    else:
+        intervention_choice = st.selectbox(
+            "Planned intervention",
+            options=[
+                'No intervention planned',
+                'Goods and Services',
+                'Case Management',
+                'Group Activities',
+                'Service Restrictions',
+                'SPDAT',
+                'Housing Placement',
+                'Follow Ups',
+                'Housing Retention',
+            ],
+            key='intervention_select'
+        )
+
+        if intervention_choice != 'No intervention planned':
+            emoji, confidence_label = WHATIF_CONFIDENCE[intervention_choice]
+
+            wif_input = input_data[feature_cols].copy()
+            wif_input['first_meaningful_intervention'] = intervention_choice
+            wif_input['first_meaningful_intervention'] = wif_input['first_meaningful_intervention'].astype('category')
+
+            wif_features = list(feature_cols) + ['first_meaningful_intervention']
+            proba_wif = model_whatif.predict_proba(wif_input[wif_features])[0][1]
+            delta = proba_wif - proba
+            delta_str = f"{delta:+.1%}"
+
+            col_base, col_sim = st.columns(2)
+            with col_base:
+                st.metric("Base risk (no intervention)", f"{proba:.1%}")
+            with col_sim:
+                st.metric(
+                    f"Simulated risk ({intervention_choice})",
+                    f"{proba_wif:.1%}",
+                    delta=delta_str,
+                    delta_color="inverse"
+                )
+
+            st.caption(f"{emoji} **{confidence_label}**")
+
+            if emoji == '🔴':
+                st.warning("⚠️ Low confidence — very few historical cases. Interpret with caution.")
+
+            st.caption(
+                "⚠️ **Association, not causation.** This simulation is based on clients who historically "
+                "received this intervention. It does not predict the causal effect of assigning it now."
+            )
