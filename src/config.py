@@ -1,6 +1,6 @@
 """
 config.py — Constants, mappings and column lists for the project
-Waterloo Region Homelessness ML — PHASE A
+Waterloo Region Homelessness ML — PHASE A / PHASE B
 """
 
 import pandas as pd
@@ -50,6 +50,8 @@ CAT_FEATURES = [
     'last_housed_location',
     'income_source',
     'annual_income_range',
+    'last_known_housing_category',   # Phase B
+    'first_intervention_type',       # Phase B
 ]
 
 # ---------------------------------------------------------------------------
@@ -164,3 +166,93 @@ LOCAL_GEO_VALUES = {
     'This Community', 'Kitchener', 'Cambridge',
     'This Region / County', 'Townships',
 }
+
+# ---------------------------------------------------------------------------
+# Phase B — Service / intervention features
+# ---------------------------------------------------------------------------
+
+ADMIN_MODULES = ['Admissions', 'Client Details']
+
+HOUSING_TYPE_MAPPING = {
+    # Cambridge Shelter (standalone — >10% individual volume)
+    'Stay at: ES - Cambridge Shelter'                              : 'Cambridge Shelter',
+    # Emergency Shelter
+    'Emergency Shelter'                                            : 'Emergency Shelter',
+    'Halfway House'                                                : 'Emergency Shelter',
+    'Hostel'                                                       : 'Emergency Shelter',
+    'Stay at: ES - HOF ShelterCare'                                : 'Emergency Shelter',
+    'Stay at: ES - House of Friendship'                            : 'Emergency Shelter',
+    'Stay at: ES - SHIP'                                           : 'Emergency Shelter',
+    'Stay at: ES - SHIP (Edith Mac)'                               : 'Emergency Shelter',
+    'Stay at: ES - SHIP 84 Frederick'                              : 'Emergency Shelter',
+    'Stay at: ES - Safe Haven Shelter'                             : 'Emergency Shelter',
+    'Stay at: ES - TWC Erbs Road Shelter'                          : 'Emergency Shelter',
+    'Stay at: ES - The Working Centre'                             : 'Emergency Shelter',
+    'Stay at: ES - YW Shelter'                                     : 'Emergency Shelter',
+    'Stay at: ES - YWCA Cambridge'                                 : 'Emergency Shelter',
+    'Stay at: ES - oneROOF'                                        : 'Emergency Shelter',
+    'Stay at: ES – Kitchener TSO'                             : 'Emergency Shelter',
+    'Stay at: ES - Argus Shelter'                                  : 'Emergency Shelter',
+    'Stay at: Argus Residence for Young Men'                       : 'Emergency Shelter',
+    'Violence Against Women – Emergency Shelter'              : 'Emergency Shelter',
+    # Transitional Housing
+    'Transitional Housing'                                         : 'Transitional Housing',
+    'Stay at: IH - TWC University Ave'                             : 'Transitional Housing',
+    'Stay at: IH - SHIP University Ave'                            : 'Transitional Housing',
+    'Stay at: TH - Marillac Place'                                 : 'Transitional Housing',
+    'Stay at: TH - KWUNWP'                                         : 'Transitional Housing',
+    'Stay at: TH - SHIP University Ave'                            : 'Transitional Housing',
+    'Stay at: TH - Porchlight'                                     : 'Transitional Housing',
+    'Domestic Violence – Transition House'                    : 'Transitional Housing',
+    'Violence Against Women – Transition House'               : 'Transitional Housing',
+    # Motel
+    'Hotel / Motel'                                                : 'Motel',
+    'Stay at: Motels - Cambridge Shelter'                          : 'Motel',
+    'Stay at: Motels - RoW'                                        : 'Motel',
+    'Stay at: Motels - The Working Centre'                         : 'Motel',
+    'Stay at: Motels - YW'                                         : 'Motel',
+    'Stay at: Motels - YW Families'                                : 'Motel',
+    'Stay at: Motels'                                              : 'Motel',
+    # Street / Encampment
+    'Makeshift / Street'                                           : 'Street/Encampment',
+    'Encampment/Campsite'                                          : 'Street/Encampment',
+    'Vehicle'                                                      : 'Street/Encampment',
+    # Couch Surfing / Family
+    'Couch Surfing – Staying with Friends / Family / Acquaintances': 'Couch Surfing/Family',
+    'Couch Surfing – Staying Temporarily with Others'         : 'Couch Surfing/Family',
+    "Housed in Family's House / Apartment"                         : 'Couch Surfing/Family',
+    'Child/Youth With Parent/Guardian'                             : 'Couch Surfing/Family',
+    '-->Child/Youth with Parent/Guardian'                          : 'Couch Surfing/Family',
+    # Stable Housing
+    'Apartment/House Rental'                                       : 'Stable Housing',
+    'Apartment / House Rental'                                     : 'Stable Housing',
+    'Rental at Market Price'                                       : 'Stable Housing',
+    'Rental at Market Price with Rent Subsidy'                     : 'Stable Housing',
+    'Co-op Housing'                                                : 'Stable Housing',
+    'Home Ownership'                                               : 'Stable Housing',
+    'Housed On-Reserve'                                            : 'Stable Housing',
+    'Room in a House'                                              : 'Stable Housing',
+    'Rooming House'                                                : 'Stable Housing',
+    'Single Room Occupancy'                                        : 'Stable Housing',
+    'Social / Community Housing'                                   : 'Stable Housing',
+    'Supportive Housing'                                           : 'Stable Housing',
+    'Group Home'                                                   : 'Stable Housing',
+    'Residential Care Facility'                                    : 'Stable Housing',
+    # Institutional
+    'Correctional Facility'                                        : 'Institutional',
+    'Detoxification Facility'                                      : 'Institutional',
+    'Hospital - Medical'                                           : 'Institutional',
+    'Hospital - Psychiatric'                                       : 'Institutional',
+    'Recovery / Treatment Facility'                                : 'Institutional',
+    # Unknown
+    'None Specified'                                               : 'Unknown',
+}
+
+PHASE_B_SERVICE_FEATURES = [
+    'last_known_housing_category',
+    'last_known_housing_missing',
+    'first_intervention_type',
+    'days_since_last_activity',
+]
+
+PHASE_B_ALL_FEATURES = PHASE_A_FEATURES + PHASE_B_SERVICE_FEATURES  # 23 total
