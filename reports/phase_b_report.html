@@ -1,0 +1,1017 @@
+
+<title>Phase B Report — Waterloo Homelessness ML</title>
+<style>
+  /* ── Tokens ── */
+  :root {
+    --bg:        #F6F3EE;
+    --bg-alt:    #EDEAE3;
+    --surface:   #FFFFFF;
+    --border:    #D4CFC5;
+    --text:      #1B2535;
+    --text-muted:#6B7585;
+    --accent:    #C97B34;
+    --accent-bg: #FDF3E8;
+    --blue:      #2D6A96;
+    --blue-bg:   #EAF2F8;
+    --green:     #2C7A52;
+    --green-bg:  #E8F4EE;
+    --red:       #A63C2A;
+    --red-bg:    #FAECE9;
+    --rule:      #C4BFB4;
+    --heading-font: Georgia, 'Times New Roman', serif;
+    --body-font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --mono:      'Courier New', Courier, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:        #101C26;
+      --bg-alt:    #172431;
+      --surface:   #1A2C3C;
+      --border:    #2A3D50;
+      --text:      #DDD8CF;
+      --text-muted:#7A8FA0;
+      --accent:    #D4893E;
+      --accent-bg: #2A1F10;
+      --blue:      #5B9FC8;
+      --blue-bg:   #122030;
+      --green:     #3EA36E;
+      --green-bg:  #0F2A1C;
+      --red:       #D4604A;
+      --red-bg:    #2A1010;
+      --rule:      #2A3D50;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:        #F6F3EE;
+    --bg-alt:    #EDEAE3;
+    --surface:   #FFFFFF;
+    --border:    #D4CFC5;
+    --text:      #1B2535;
+    --text-muted:#6B7585;
+    --accent:    #C97B34;
+    --accent-bg: #FDF3E8;
+    --blue:      #2D6A96;
+    --blue-bg:   #EAF2F8;
+    --green:     #2C7A52;
+    --green-bg:  #E8F4EE;
+    --red:       #A63C2A;
+    --red-bg:    #FAECE9;
+    --rule:      #C4BFB4;
+  }
+  :root[data-theme="dark"] {
+    --bg:        #101C26;
+    --bg-alt:    #172431;
+    --surface:   #1A2C3C;
+    --border:    #2A3D50;
+    --text:      #DDD8CF;
+    --text-muted:#7A8FA0;
+    --accent:    #D4893E;
+    --accent-bg: #2A1F10;
+    --blue:      #5B9FC8;
+    --blue-bg:   #122030;
+    --green:     #3EA36E;
+    --green-bg:  #0F2A1C;
+    --red:       #D4604A;
+    --red-bg:    #2A1010;
+    --rule:      #2A3D50;
+  }
+
+  /* ── Reset & base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body-font);
+    font-size: 1rem;
+    line-height: 1.65;
+    padding: 0 1.25rem 4rem;
+  }
+
+  /* ── Page wrapper ── */
+  .page { max-width: 820px; margin: 0 auto; }
+
+  /* ── Cover ── */
+  .cover {
+    border-bottom: 3px solid var(--accent);
+    padding: 3.5rem 0 2.5rem;
+    margin-bottom: 2.75rem;
+  }
+  .cover-eyebrow {
+    font-family: var(--body-font);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  .cover h1 {
+    font-family: var(--heading-font);
+    font-size: 2.3rem;
+    font-weight: normal;
+    line-height: 1.2;
+    text-wrap: balance;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+  .cover-sub {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    max-width: 640px;
+    margin-bottom: 1.75rem;
+  }
+  .cover-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  .cover-meta-item {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+  .cover-meta-item strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* ── Section ── */
+  .section {
+    margin-bottom: 3.5rem;
+  }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    padding-top: 0.25rem;
+  }
+  .section-header h2 {
+    font-family: var(--heading-font);
+    font-size: 1.4rem;
+    font-weight: normal;
+    color: var(--text);
+    text-wrap: balance;
+  }
+
+  /* ── Sub-section ── */
+  h3 {
+    font-family: var(--heading-font);
+    font-size: 1.05rem;
+    font-weight: bold;
+    color: var(--text);
+    margin: 1.75rem 0 0.6rem;
+    text-wrap: balance;
+  }
+
+  p {
+    margin-bottom: 0.85rem;
+    max-width: 700px;
+  }
+
+  /* ── Metric cards ── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin: 1.5rem 0;
+  }
+  .metric-card {
+    background: var(--surface);
+    padding: 1.1rem 1.25rem;
+  }
+  .metric-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+  }
+  .metric-value {
+    font-family: var(--mono);
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .metric-value.accent { color: var(--accent); }
+  .metric-value.blue   { color: var(--blue); }
+  .metric-value.green  { color: var(--green); }
+  .metric-sub {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+  }
+  .metric-delta {
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-top: 0.25rem;
+  }
+  .metric-delta.up   { color: var(--green); }
+  .metric-delta.down { color: var(--red); }
+
+  /* ── Tables ── */
+  .table-wrap { overflow-x: auto; margin: 1.25rem 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    font-variant-numeric: tabular-nums;
+  }
+  thead tr {
+    background: var(--bg-alt);
+    border-bottom: 2px solid var(--border);
+  }
+  th {
+    font-family: var(--body-font);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0.6rem 0.9rem;
+    text-align: left;
+    white-space: nowrap;
+  }
+  th.right, td.right { text-align: right; }
+  td {
+    padding: 0.55rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg-alt); }
+  td.num { font-family: var(--mono); font-size: 0.85rem; }
+  .tag {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.45rem;
+    border-radius: 2px;
+    vertical-align: middle;
+  }
+  .tag-new  { background: var(--accent-bg); color: var(--accent); }
+  .tag-base { background: var(--blue-bg);   color: var(--blue); }
+
+  /* ── Callout boxes ── */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-bg);
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+    font-size: 0.93rem;
+  }
+  .callout.blue {
+    border-color: var(--blue);
+    background: var(--blue-bg);
+  }
+  .callout.green {
+    border-color: var(--green);
+    background: var(--green-bg);
+  }
+  .callout.warning {
+    border-color: var(--red);
+    background: var(--red-bg);
+  }
+  .callout-label {
+    font-size: 0.69rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+    color: inherit;
+    opacity: 0.75;
+  }
+  .callout p { max-width: none; margin-bottom: 0; }
+  .callout p + p { margin-top: 0.4rem; }
+
+  /* ── Comparison bar ── */
+  .compare-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0.5rem 0;
+    font-size: 0.88rem;
+  }
+  .compare-label {
+    width: 100px;
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .compare-bar-wrap {
+    flex: 1;
+    background: var(--bg-alt);
+    height: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .compare-bar {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding-left: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-weight: bold;
+    color: #fff;
+    transition: width 0.6s ease;
+  }
+  .compare-bar.phase-a { background: var(--blue); }
+  .compare-bar.phase-b { background: var(--green); }
+
+  /* ── Feature pills ── */
+  .feature-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+  }
+  .feature-pill {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+  }
+  .feature-pill.new {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-bg);
+  }
+
+  /* ── Two-col layout for findings ── */
+  .finding-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin: 1.25rem 0;
+  }
+  .finding-cell {
+    background: var(--surface);
+    padding: 1.1rem 1.25rem;
+  }
+  .finding-cell-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .finding-cell-label.never { color: var(--green); }
+  .finding-cell-label.did   { color: var(--red); }
+  .finding-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    padding: 0.2rem 0;
+    border-bottom: 1px solid var(--bg-alt);
+  }
+  .finding-item:last-child { border-bottom: none; }
+  .finding-item .pct {
+    font-family: var(--mono);
+    font-weight: bold;
+  }
+
+  /* ── Divider ── */
+  hr {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 2.5rem 0;
+  }
+
+  /* ── Small text ── */
+  .footnote {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-top: 0.5rem;
+  }
+
+  ul, ol {
+    padding-left: 1.4rem;
+    margin-bottom: 0.85rem;
+  }
+  li {
+    margin-bottom: 0.3rem;
+    font-size: 0.95rem;
+  }
+
+  strong { font-weight: 700; }
+
+  .highlight {
+    background: var(--accent-bg);
+    padding: 0.05rem 0.3rem;
+    font-weight: 600;
+  }
+
+  @media (max-width: 600px) {
+    .cover h1 { font-size: 1.7rem; }
+    .metrics-grid { grid-template-columns: 1fr 1fr; }
+    .finding-row { grid-template-columns: 1fr; }
+    .compare-label { width: 70px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .compare-bar { transition: none; }
+  }
+</style>
+
+<div class="page">
+
+  <!-- ── COVER ── -->
+  <header class="cover">
+    <div class="cover-eyebrow">Waterloo Region · Data for Good · Chronic Homelessness ML</div>
+    <h1>Phase B Report<br>Service Features & Intervention Outcomes</h1>
+    <p class="cover-sub">
+      Model 1 retrained with four new service features derived from CAM data — housing type and intake intervention — achieving a significant lift in predictive performance. A new descriptive analysis answers PECH's original question about which interventions are associated with better outcomes in high-risk clients.
+    </p>
+    <div class="cover-meta">
+      <div class="cover-meta-item"><strong>Date</strong> July 2026</div>
+      <div class="cover-meta-item"><strong>Dataset</strong> D4G_CAM_Final.xlsx</div>
+      <div class="cover-meta-item"><strong>Valid clients</strong> 9,576</div>
+      <div class="cover-meta-item"><strong>Model</strong> LightGBM · Optuna 50 trials</div>
+      <div class="cover-meta-item"><strong>Train / Test split</strong> Feb 1, 2024</div>
+    </div>
+  </header>
+
+
+  <!-- ── 1. CONTEXT ── -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>Context and Objectives</h2>
+    </div>
+
+    <p>
+      Phase A delivered a working risk model (19 features, ROC-AUC 0.779) that flags clients likely to become chronically homeless at the moment of intake. Phase B had two objectives:
+    </p>
+    <ol>
+      <li><strong>Extend Model 1</strong> with service features already present in the CAM data — specifically the client's housing type and first intervention at intake — to improve predictive accuracy.</li>
+      <li><strong>Answer PECH's original question:</strong> which interventions are associated with avoiding chronic homelessness, particularly among clients the model identifies as high-risk?</li>
+    </ol>
+
+    <div class="callout blue">
+      <div class="callout-label">Design constraint</div>
+      <p>All new features are derived from the client's <em>first</em> snapshot only, preserving the no-leakage guarantee of the Phase A model. The model still predicts risk at the moment of intake using only information available on day one.</p>
+    </div>
+  </section>
+
+
+  <!-- ── 2. NEW FEATURES ── -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Four New Features</h2>
+    </div>
+
+    <p>
+      Phase B adds four features to Model 1, bringing the total from 19 (Phase A) to 23. All four are extracted from the first CAM snapshot per client.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Source column</th>
+            <th>Type</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>last_known_housing_category</code> <span class="tag tag-new">New</span></td>
+            <td>Last Known Housing Type</td>
+            <td>Categorical · 9 values</td>
+            <td>63 raw values grouped into 9 stable categories</td>
+          </tr>
+          <tr>
+            <td><code>last_known_housing_missing</code> <span class="tag tag-new">New</span></td>
+            <td>Last Known Housing Type</td>
+            <td>Binary</td>
+            <td>1 if NaN or "None Specified" (22.3% of records)</td>
+          </tr>
+          <tr>
+            <td><code>first_intervention_type</code> <span class="tag tag-new">New</span></td>
+            <td>Recent Interaction Module</td>
+            <td>Categorical · 10 values</td>
+            <td>Single categorical replaces 8 mutually exclusive binary flags</td>
+          </tr>
+          <tr>
+            <td><code>days_since_last_activity</code> <span class="tag tag-new">New</span></td>
+            <td>Days Since Last Activity</td>
+            <td>Numeric</td>
+            <td>2.8% missing · measures engagement gap at intake</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Housing type grouping (63 → 9 categories)</h3>
+    <p>
+      The raw field contains 63 distinct values created by caseworkers over time (duplicate names, abbreviations, provider suffixes). We consolidated them into 9 meaningful categories based on housing stability and service type. The grouping was reviewed and approved by the technical lead.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th class="right">Clients</th>
+            <th class="right">%</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Emergency Shelter</td><td class="num right">16,170 rows</td><td class="num right">27.1%</td></tr>
+          <tr><td>Unknown (NaN + None Specified)</td><td class="num right">13,294</td><td class="num right">22.3%</td></tr>
+          <tr><td>Street / Encampment</td><td class="num right">6,643</td><td class="num right">11.1%</td></tr>
+          <tr><td>Cambridge Shelter <span class="tag tag-new" style="font-size:0.63rem;">standalone</span></td><td class="num right">6,221</td><td class="num right">10.4%</td></tr>
+          <tr><td>Motel</td><td class="num right">5,864</td><td class="num right">9.8%</td></tr>
+          <tr><td>Couch Surfing / Family</td><td class="num right">4,000</td><td class="num right">6.7%</td></tr>
+          <tr><td>Stable Housing</td><td class="num right">3,550</td><td class="num right">6.0%</td></tr>
+          <tr><td>Transitional Housing</td><td class="num right">2,784</td><td class="num right">4.7%</td></tr>
+          <tr><td>Institutional</td><td class="num right">1,098</td><td class="num right">1.8%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="footnote">Cambridge Shelter is kept as a standalone category because it exceeds 10% volume — the threshold recommended by the technical lead to avoid grouping a dominant provider into a generic bucket.</p>
+
+    <h3>First intervention type distribution</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Intervention at intake</th>
+            <th class="right">Clients</th>
+            <th class="right">Share</th>
+            <th class="right">Chronic rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Goods and Services</td><td class="num right">4,439</td><td class="num right">46.2%</td><td class="num right">17.5%</td></tr>
+          <tr><td>Admissions</td><td class="num right">3,105</td><td class="num right">32.4%</td><td class="num right">56.5%</td></tr>
+          <tr><td>Group Activities</td><td class="num right">773</td><td class="num right">8.1%</td><td class="num right">33.0%</td></tr>
+          <tr><td>Case Management</td><td class="num right">676</td><td class="num right">7.1%</td><td class="num right">47.8%</td></tr>
+          <tr><td>Client Details</td><td class="num right">431</td><td class="num right">4.5%</td><td class="num right">16.5%</td></tr>
+          <tr><td>SPDAT</td><td class="num right">62</td><td class="num right">0.6%</td><td class="num right">71.0%</td></tr>
+          <tr><td>Service Restrictions</td><td class="num right">46</td><td class="num right">0.5%</td><td class="num right">56.5%</td></tr>
+          <tr><td>Housing Placement</td><td class="num right">22</td><td class="num right">0.2%</td><td class="num right">27.3%</td></tr>
+          <tr><td>Other / missing</td><td class="num right">22</td><td class="num right">0.2%</td><td class="num right">–</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warning">
+      <div class="callout-label">Selection bias — important</div>
+      <p>Chronic rates differ widely across interventions, but this reflects who gets assigned each intervention, not whether the intervention works. SPDAT (71%) and Case Management (48%) are assigned to the most vulnerable clients from the start. The model accounts for this through the mean risk score — not through raw chronic rates.</p>
+    </div>
+  </section>
+
+
+  <!-- ── 3. MODEL PERFORMANCE ── -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Model Performance — Phase A vs Phase B</h2>
+    </div>
+
+    <p>
+      Both models use an identical temporal split: clients whose first record was created on or before February 1, 2024 form the training set; those after form the test set. The Phase A baseline was retrained on the same split for a fair comparison.
+    </p>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Test set size</div>
+        <div class="metric-value blue">2,349</div>
+        <div class="metric-sub">clients (after Feb 2024)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Chronic rate — test</div>
+        <div class="metric-value">17.9%</div>
+        <div class="metric-sub">vs 39.3% in training set</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Phase B ROC-AUC</div>
+        <div class="metric-value green">0.874</div>
+        <div class="metric-delta up">▲ +0.129 vs Phase A</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Recall @0.20</div>
+        <div class="metric-value accent">0.983</div>
+        <div class="metric-sub">chronic class · Phase B</div>
+      </div>
+    </div>
+
+    <h3>ROC-AUC comparison</h3>
+
+    <div class="compare-row">
+      <span class="compare-label">Phase A<br><span style="font-size:0.72rem;font-family:var(--mono)">19 features</span></span>
+      <div class="compare-bar-wrap">
+        <div class="compare-bar phase-a" style="width:74.4%">0.744</div>
+      </div>
+    </div>
+    <div class="compare-row">
+      <span class="compare-label">Phase B<br><span style="font-size:0.72rem;font-family:var(--mono)">23 features</span></span>
+      <div class="compare-bar-wrap">
+        <div class="compare-bar phase-b" style="width:87.4%">0.874</div>
+      </div>
+    </div>
+
+    <h3>Full metrics at threshold 0.20 (production setting)</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th class="right">Phase A (19 feat.)</th>
+            <th class="right">Phase B (23 feat.)</th>
+            <th class="right">Change</th>
+            <th>Target</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>ROC-AUC</strong></td>
+            <td class="num right">0.744</td>
+            <td class="num right">0.874</td>
+            <td class="num right" style="color:var(--green);font-weight:700;">+0.129</td>
+            <td>&gt; 0.82 ✓</td>
+          </tr>
+          <tr>
+            <td>Recall (chronic class)</td>
+            <td class="num right">0.542</td>
+            <td class="num right">0.983</td>
+            <td class="num right" style="color:var(--green);font-weight:700;">+0.442</td>
+            <td>&gt; 0.75 ✓</td>
+          </tr>
+          <tr>
+            <td>Precision (chronic class)</td>
+            <td class="num right">0.399</td>
+            <td class="num right">0.377</td>
+            <td class="num right" style="color:var(--text-muted);">−0.022</td>
+            <td>&gt; 0.50 ✗</td>
+          </tr>
+          <tr>
+            <td>F1 score</td>
+            <td class="num right">0.459</td>
+            <td class="num right">0.545</td>
+            <td class="num right" style="color:var(--green);font-weight:700;">+0.086</td>
+            <td>&gt; 0.65</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>What the metrics mean in plain terms</h3>
+    <p>The test set contains <strong>2,349 clients</strong>, of whom <strong>421 actually became chronic</strong> (17.9%). Here is what each metric means in concrete terms at threshold 0.20:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>What it measures</th>
+            <th>In practice (Phase B)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>ROC-AUC 0.874</strong></td>
+            <td>If you pick one chronic client and one non-chronic client at random, how often does the model rank the chronic one higher?</td>
+            <td>87.4% of the time the model correctly ranks the higher-risk client above the lower-risk one.</td>
+          </tr>
+          <tr>
+            <td><strong>Recall 0.983</strong></td>
+            <td>Of all clients who <em>actually</em> became chronic, how many did the model flag?</td>
+            <td>Of the 421 truly chronic clients, <strong>414 are correctly flagged</strong>. Only 7 slip through undetected.</td>
+          </tr>
+          <tr>
+            <td><strong>Precision 0.377</strong></td>
+            <td>Of all clients the model flags as high-risk, how many actually became chronic?</td>
+            <td>The model flags ~1,098 clients as high-risk. Of those, <strong>414 truly become chronic</strong> and <strong>~684 are false alarms</strong> — caseworkers review them and no action is needed.</td>
+          </tr>
+          <tr>
+            <td><strong>F1 0.545</strong></td>
+            <td>Balanced average of recall and precision.</td>
+            <td>Improves from 0.459 (Phase A) to 0.545 — both recall and precision moved in the right direction together.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <div class="callout-label">The recall–precision trade-off</div>
+      <p>Setting the threshold low (0.20) casts a wide net: the model catches <strong>98.3% of truly chronic clients</strong>, at the cost of <strong>~6 in 10 alerts being false alarms</strong>. Raising the threshold would reduce false alarms but miss more real cases.</p>
+      <p>For this use case — social services where <strong>missing a high-risk client is more costly than a false alarm</strong> — high recall is the right priority. A caseworker can review an alert that turns out to be unnecessary; they cannot help a client who was never flagged.</p>
+    </div>
+
+    <p>
+      The housing features are the dominant driver of the Phase B lift. <code>last_known_housing_category</code> is the single most predictive feature in the model — consistent with Phase A's finding that housing stability is the strongest predictor of chronic homelessness. The intervention feature (<code>first_intervention_type</code>) contributes meaningfully but ranks lower, in part because it captures assignment patterns (who gets which intervention) rather than intervention effects.
+    </p>
+  </section>
+
+
+  <!-- ── 4. INTERVENTION OUTCOMES ── -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Intervention Outcomes Analysis</h2>
+    </div>
+
+    <p>
+      Notebook <code>06_intervention_outcomes.ipynb</code> addresses PECH's original question descriptively: among clients the model identified as high risk at intake, which interventions were present in those who ultimately avoided chronic homelessness?
+    </p>
+
+    <div class="callout warning">
+      <div class="callout-label">Observational data — associations only</div>
+      <p>This analysis cannot establish causality. Differences between groups may reflect who was assigned each intervention (initial risk profile), not the direct effect of the intervention itself. The findings are a guide for generating hypotheses — not proof of effectiveness.</p>
+    </div>
+
+    <h3>The high-risk group</h3>
+    <p>
+      3,850 clients (40.2% of all valid clients) received a Model 1 score above 0.50 — classified as high risk at intake. Within this group:
+    </p>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">High risk total</div>
+        <div class="metric-value">3,850</div>
+        <div class="metric-sub">score &gt; 0.50 at intake</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Never became chronic ✅</div>
+        <div class="metric-value green">1,147</div>
+        <div class="metric-delta up">29.8% of high-risk</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Did become chronic ❌</div>
+        <div class="metric-value" style="color:var(--red)">2,703</div>
+        <div class="metric-delta" style="color:var(--red)">70.2% of high-risk</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Median days in system</div>
+        <div class="metric-value accent">90</div>
+        <div class="metric-sub">all valid clients</div>
+      </div>
+    </div>
+
+    <h3>Intake intervention by group</h3>
+    <p>How interventions distribute within each subgroup (each column sums to 100%). The <strong>difference</strong> column shows the gap between the two groups in percentage points.</p>
+
+    <div class="finding-row">
+      <div class="finding-cell">
+        <div class="finding-cell-label never">Never became chronic ✅ (n=1,147)</div>
+        <div class="finding-item"><span>Goods and Services</span><span class="pct" style="color:var(--green)">28.9%</span></div>
+        <div class="finding-item"><span>Admissions</span><span class="pct">26.1%</span></div>
+        <div class="finding-item"><span>Case Management</span><span class="pct">19.0%</span></div>
+        <div class="finding-item"><span>Group Activities</span><span class="pct">12.5%</span></div>
+        <div class="finding-item"><span>Client Details</span><span class="pct">6.5%</span></div>
+        <div class="finding-item"><span>Other</span><span class="pct">7.0%</span></div>
+      </div>
+      <div class="finding-cell">
+        <div class="finding-cell-label did">Did become chronic ❌ (n=2,703)</div>
+        <div class="finding-item"><span>Goods and Services</span><span class="pct" style="color:var(--text-muted)">19.9%</span></div>
+        <div class="finding-item"><span>Admissions</span><span class="pct">27.4%</span></div>
+        <div class="finding-item"><span>Case Management</span><span class="pct">25.7%</span></div>
+        <div class="finding-item"><span>Group Activities</span><span class="pct">13.8%</span></div>
+        <div class="finding-item"><span>Client Details</span><span class="pct">5.6%</span></div>
+        <div class="finding-item"><span>Other</span><span class="pct">7.6%</span></div>
+      </div>
+    </div>
+
+    <h3>Key patterns</h3>
+
+    <div class="callout green">
+      <div class="callout-label">Goods and Services signal</div>
+      <p><strong>+9 percentage points at intake</strong> (28.9% vs 19.9%) and <strong>+11 points at last recorded intervention</strong> (31.3% vs 20.2%) in clients who never became chronic. This is the most consistent signal across both intake and trajectory analyses. Mean risk score for Goods and Services clients is 0.712 — substantially lower than Case Management (0.869), but still in the high-risk band.</p>
+    </div>
+
+    <div class="callout blue">
+      <div class="callout-label">Case Management and selection bias</div>
+      <p>Case Management appears much more frequently in clients who did become chronic (25.7% vs 19.0% at intake; 16.6% vs 6.1% at last intervention). This is consistent with <strong>selection bias</strong>: caseworkers assign intensive case management to the most vulnerable clients, who have the highest initial risk regardless of the intervention. Mean risk score for Case Management clients is <span class="highlight">0.869</span> — the highest of all interventions.</p>
+    </div>
+
+    <h3>Trajectory analysis</h3>
+    <p>Looking beyond the intake snapshot, we built the full intervention sequence for each client across all their CAM records:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th class="right">Never became chronic ✅</th>
+            <th class="right">Did become chronic ❌</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Avg. snapshots per client</td>
+            <td class="num right">~3.5</td>
+            <td class="num right">~7.1</td>
+          </tr>
+          <tr>
+            <td>% who changed intervention</td>
+            <td class="num right">lower</td>
+            <td class="num right">higher</td>
+          </tr>
+          <tr>
+            <td>Avg. distinct interventions</td>
+            <td class="num right">lower</td>
+            <td class="num right">higher</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="footnote">Clients who became chronic had more snapshots and more intervention changes — consistent with longer, more complex cases. The "never chronic" group left the system faster and with fewer touchpoints.</p>
+
+    <h3>Most common intervention transitions</h3>
+    <p>In high-risk clients who never became chronic, the most frequent consecutive intervention pairs are:</p>
+    <ul>
+      <li>Admissions → Goods and Services (88 instances)</li>
+      <li>Admissions → Group Activities (58 instances)</li>
+      <li>Goods and Services → Admissions (53 instances)</li>
+    </ul>
+    <p>In clients who did become chronic, the same transitions appear but at much higher volume, with Case Management transitions becoming far more prominent (Admissions → Case Management: 355 instances).</p>
+  </section>
+
+
+  <!-- ── 5. FEATURE OVERVIEW ── -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Complete Feature Set — 23 Features</h2>
+    </div>
+
+    <div class="feature-grid">
+      <span class="feature-pill">entry_year</span>
+      <span class="feature-pill">entry_season</span>
+      <span class="feature-pill">days_before_first_snapshot</span>
+      <span class="feature-pill">age</span>
+      <span class="feature-pill">gender</span>
+      <span class="feature-pill">indigenous_status</span>
+      <span class="feature-pill">veteran_status</span>
+      <span class="feature-pill">immigration_status</span>
+      <span class="feature-pill">household_type</span>
+      <span class="feature-pill">has_income</span>
+      <span class="feature-pill">income_source</span>
+      <span class="feature-pill">yearly_income</span>
+      <span class="feature-pill">annual_income_range</span>
+      <span class="feature-pill">has_very_low_income</span>
+      <span class="feature-pill">income_source_missing</span>
+      <span class="feature-pill">yearly_income_missing</span>
+      <span class="feature-pill">tri_morbidity</span>
+      <span class="feature-pill">returned_from_housing</span>
+      <span class="feature-pill">first_homeless_episode</span>
+      <span class="feature-pill new">last_known_housing_category</span>
+      <span class="feature-pill new">last_known_housing_missing</span>
+      <span class="feature-pill new">first_intervention_type</span>
+      <span class="feature-pill new">days_since_last_activity</span>
+    </div>
+    <p class="footnote"><span style="color:var(--accent);font-weight:700;">Orange</span> = new Phase B features. All features are extracted from the first snapshot per client — no temporal leakage.</p>
+  </section>
+
+
+  <!-- ── 6. LIMITATIONS ── -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Limitations and Honest Caveats</h2>
+    </div>
+
+    <ul>
+      <li><strong>Precision remains below target.</strong> At threshold 0.20, precision is 0.377 — below the 0.50 target. Roughly 6 in 10 clients flagged as high-risk did not become chronic in the test set. The model is designed for recall (catching true positives), but caseworkers should be aware of the false alarm rate.</li>
+      <li><strong>Training/test distribution shift.</strong> The training set has a 39.3% chronic rate vs 17.9% in the test set. This reflects real temporal change in the population — newer clients may have shorter follow-up or differ in profile. Performance should be monitored over time.</li>
+      <li><strong>Intervention outcomes are descriptive only.</strong> We cannot establish causal effectiveness of any intervention from observational CAM data. The Goods and Services signal is consistent and noteworthy, but it requires a controlled study to validate.</li>
+      <li><strong>Geographic features excluded.</strong> Geographic region has 47–69% missing data and was excluded from both phases. If location correlates with access to services, this is an uncontrolled confound.</li>
+      <li><strong>External validity.</strong> The model was trained on Waterloo Region data. Performance may differ in other systems with different intake processes or population profiles.</li>
+    </ul>
+
+    <div class="callout warning">
+      <div class="callout-label">⚠ Fairness alert — Youth group</div>
+      <p>The model performs significantly worse for clients under 25 years old. At threshold 0.32, the recall gap between age groups is <strong>0.401</strong> — well above the 0.10 alert threshold.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Age group</th>
+            <th class="right">N (test set)</th>
+            <th class="right">Recall</th>
+            <th class="right">False Negative Rate</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Youth (&lt;25)</strong></td>
+            <td class="num right">466</td>
+            <td class="num right" style="color:var(--red);font-weight:700;">0.551</td>
+            <td class="num right" style="color:var(--red);font-weight:700;">44.9%</td>
+            <td><span class="tag" style="background:var(--red-bg);color:var(--red);">ALERT</span></td>
+          </tr>
+          <tr>
+            <td>Adult (25–55)</td>
+            <td class="num right">1,511</td>
+            <td class="num right">0.877</td>
+            <td class="num right">12.3%</td>
+            <td><span class="tag tag-base">PASS</span></td>
+          </tr>
+          <tr>
+            <td>Senior (&gt;55)</td>
+            <td class="num right">372</td>
+            <td class="num right">0.952</td>
+            <td class="num right">4.8%</td>
+            <td><span class="tag tag-base">PASS</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Of every 10 young clients who will actually become chronic, the model only flags 5 — the other 5 leave intake without being identified as high risk. This gap needs to be investigated before relying on the model for decisions involving youth clients. A possible cause is that young clients have different patterns of housing instability and intervention that the current features do not capture well.</p>
+  </section>
+
+
+  <!-- ── 7. NEXT STEPS ── -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>Recommended Next Steps</h2>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Priority</th>
+            <th>Task</th>
+            <th>Reference</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag tag-new">High</span></td>
+            <td>Present findings to PECH</td>
+            <td>06_intervention_outcomes.ipynb</td>
+            <td>Share the intervention outcomes analysis with PECH in non-technical language — highlight the Goods and Services signal and the selection bias caveat</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-new">High</span></td>
+            <td>Move app to a shared server</td>
+            <td>app.py</td>
+            <td>Currently runs only on a local machine. Moving it to a shared server allows PECH and caseworkers to access it from any computer without technical setup</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-new">High</span></td>
+            <td>Investigate Youth recall gap</td>
+            <td>03_fairness_audit.ipynb</td>
+            <td>The model misses 44.9% of truly chronic youth clients (&lt;25). Investigate whether youth-specific features or a separate model sub-segment could close this gap before using the model for youth client decisions</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-base">Medium</span></td>
+            <td>Fairness re-audit with Phase B features</td>
+            <td>03_fairness_audit.ipynb</td>
+            <td>Confirm that the new housing and intervention features do not widen recall gaps for Indigenous clients or other groups</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-base">Medium</span></td>
+            <td>Monitor model performance over time</td>
+            <td>–</td>
+            <td>As new data accumulates past the Feb 2024 test window, track ROC-AUC and recall to detect drift from the training distribution</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <!-- ── FOOTER ── -->
+  <hr>
+  <p class="footnote" style="text-align:center;">
+    Waterloo Region Homelessness ML · Data for Good · Phase B · July 2026<br>
+    Model file: <code>phase_b_model1_20260712.pkl</code> · Notebook: <code>06_intervention_outcomes.ipynb</code>
+  </p>
+
+</div>
