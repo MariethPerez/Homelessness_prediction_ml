@@ -30,23 +30,24 @@ The tool is designed to **support**, not replace, caseworker judgment.
 
 ---
 
-## Three-Model Architecture
+## Two-Model Architecture
 
 ```
-Model 1        → 02_baseline_model.ipynb  → first snapshot only   → risk score at intake (caseworkers)
-Model What-if  → 05_whatif_model.ipynb    → full history          → intervention simulation (caseworkers)
-Model 2        → 04_intervention_explainability.ipynb             → effectiveness analysis (PECH)
-                    ├── Component A: Kaplan-Meier survival curves
-                    └── Component B: LightGBM retrospective (12-month window)
+Model 1   → 02_baseline_model.ipynb               → first snapshot only   → risk score at intake (caseworkers)
+Model 2   → 04_intervention_explainability.ipynb  → first 12 months       → effectiveness analysis (PECH)
+                ├── Component A: Kaplan-Meier survival curves
+                └── Component B: LightGBM retrospective (12-month window)
 ```
 
-| | Model 1 | Model What-if | Model 2 |
-|---|---|---|---|
-| **Purpose** | Risk score at intake | Simulate intervention effect | Explain intervention effectiveness |
-| **Data** | First snapshot only | Full client history | First 12 months |
-| **Key feature** | 23 Phase B features | + `first_meaningful_intervention` | Housing stability + interaction rates |
-| **Leakage** | None | Intentional — declared | Intentional — retrospective analysis only |
-| **Used in** | Streamlit app — Step 1 | Streamlit app — Step 2 | PECH reports |
+| | Model 1 | Model 2 |
+|---|---|---|
+| **Purpose** | Risk score at intake | Explain intervention effectiveness |
+| **Data** | First snapshot only | First 12 months |
+| **Key features** | 23 Phase B features | Housing stability + interaction rates |
+| **Leakage** | None | Intentional — retrospective analysis only |
+| **Used in** | Streamlit app | PECH reports |
+
+> **Note:** An intervention simulation feature is under development in `05_whatif_model.ipynb`. The initial approach reflected caseworker selection bias and has been redesigned.
 
 ---
 
@@ -170,7 +171,7 @@ jupyter notebook
 | 2 | `02_baseline_model.ipynb` | `models/phase_b_model1_*.pkl` |
 | 3 | `03_fairness_audit.ipynb` | Fairness report |
 | 4 | `04_intervention_explainability.ipynb` | KM curves, SHAP, permutation importance |
-| 5 | `05_whatif_model.ipynb` | `models/phase_b_whatif_*.pkl` |
+| 5 | `05_whatif_model.ipynb` | Intervention simulation — in development |
 
 ### Run the app
 
@@ -178,7 +179,88 @@ jupyter notebook
 streamlit run app.py
 ```
 
-Opens at `http://localhost:8501`. Requires both model pkl files in `models/`.
+Opens at `http://localhost:8501`. Requires `phase_b_model1_*.pkl` in `models/`.
+
+---
+
+## Test Cases (real clients from test set)
+
+Use these to verify the app is working correctly. All clients are from the post-Feb 2024 test set. Enter the values exactly as shown and compare the predicted score.
+
+---
+
+### Test Case 1 — HIGH RISK (client became chronic ✅)
+**Dummy Client ID:** `A102A28`
+
+| Field | Value |
+|---|---|
+| Date client record was created | 2024-11-02 |
+| Date of first monthly snapshot | 2025-07-31 |
+| Age | 39 |
+| Gender | Male |
+| Indigenous Status | Non-Indigenous |
+| Veteran Status | Not a Veteran |
+| Immigration Status | Canadian Citizen |
+| Household Type | Single |
+| Income | Yes — Ontario Works (OW), $700/month |
+| Tri-Morbidity | No |
+| Returned from Housing | No |
+| First Homeless Episode | Yes |
+| Last Known Housing Type | Emergency Shelter |
+| First Interaction Module | Admissions |
+| Days Since Last Activity | 28 |
+
+**Expected result:** ~86.9% → 🔴 HIGH RISK — client did become chronically homeless.
+
+---
+
+### Test Case 2 — LOW RISK (client did not become chronic ✅)
+**Dummy Client ID:** `A116Q99`
+
+| Field | Value |
+|---|---|
+| Date client record was created | 2024-08-22 |
+| Date of first monthly snapshot | 2024-08-31 |
+| Age | 50 |
+| Gender | Female |
+| Indigenous Status | Indigenous |
+| Veteran Status | Not a Veteran |
+| Immigration Status | Canadian Citizen |
+| Household Type | Single |
+| Income | No |
+| Tri-Morbidity | No |
+| Returned from Housing | No |
+| First Homeless Episode | No |
+| Last Known Housing Type | Unknown |
+| First Interaction Module | Goods and Services |
+| Days Since Last Activity | 24 |
+
+**Expected result:** ~0.2% → 🟢 LOW RISK — client did not become chronically homeless.
+
+---
+
+### Test Case 3 — YOUTH WARNING (client became chronic, model underestimates ⚠️)
+**Dummy Client ID:** `A794Z21`
+
+| Field | Value |
+|---|---|
+| Date client record was created | 2025-01-24 |
+| Date of first monthly snapshot | 2025-07-31 |
+| Age | 17 |
+| Gender | Female |
+| Indigenous Status | Non-Indigenous |
+| Veteran Status | Not a Veteran |
+| Immigration Status | Canadian Citizen |
+| Household Type | Family |
+| Income | No |
+| Tri-Morbidity | No |
+| Returned from Housing | No |
+| First Homeless Episode | Yes |
+| Last Known Housing Type | Motel |
+| First Interaction Module | Case Management |
+| Days Since Last Activity | 180 |
+
+**Expected result:** ~39.3% → 🟡 LOW-MODERATE RISK + ⚠️ youth warning. Client did become chronically homeless — illustrates the model's lower recall for youth (<25), documented in the fairness audit.
 
 ---
 

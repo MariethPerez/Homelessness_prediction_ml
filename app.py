@@ -38,26 +38,11 @@ def load_models():
         st.stop()
     model_1 = joblib.load(m1_files[-1])['model']
 
-    # Model What-if (optional — disables simulation if not found)
-    wif_files = sorted(glob.glob('models/phase_b_whatif_*.pkl'))
-    model_whatif = joblib.load(wif_files[-1])['model'] if wif_files else None
+    return model_1
 
-    return model_1, model_whatif
-
-model_1, model_whatif = load_models()
+model_1 = load_models()
 
 THRESHOLD = 0.32
-
-WHATIF_CONFIDENCE = {
-    'Goods and Services' : ('🟢', 'High confidence (5,063 historical cases)'),
-    'Case Management'    : ('🟢', 'High confidence (1,104 historical cases)'),
-    'Group Activities'   : ('🟢', 'High confidence (1,031 historical cases)'),
-    'Service Restrictions': ('🟡', 'Medium confidence (103 historical cases)'),
-    'SPDAT'              : ('🟡', 'Medium confidence (88 historical cases)'),
-    'Housing Placement'  : ('🔴', 'Low confidence — few historical cases (47)'),
-    'Follow Ups'         : ('🔴', 'Low confidence — few historical cases (14)'),
-    'Housing Retention'  : ('🔴', 'Low confidence — few historical cases (12)'),
-}
 
 # ---------------------------------------------------------------------------
 # Income source options
@@ -376,64 +361,3 @@ if 'proba' in st.session_state:
             "not individual risk factors."
         )
 
-    # -----------------------------------------------------------------------
-    # Simulate Intervention (What-if)
-    # -----------------------------------------------------------------------
-    st.divider()
-    st.subheader("🔄 Simulate Intervention")
-    st.caption(
-        "Select a planned intervention to estimate how the risk score might change. "
-        "This uses a separate model trained on full client histories."
-    )
-
-    if model_whatif is None:
-        st.info("What-if model not found. Run notebooks/05_whatif_model.ipynb to enable this feature.")
-    else:
-        intervention_choice = st.selectbox(
-            "Planned intervention",
-            options=[
-                'No intervention planned',
-                'Goods and Services',
-                'Case Management',
-                'Group Activities',
-                'Service Restrictions',
-                'SPDAT',
-                'Housing Placement',
-                'Follow Ups',
-                'Housing Retention',
-            ],
-            key='intervention_select'
-        )
-
-        if intervention_choice != 'No intervention planned':
-            emoji, confidence_label = WHATIF_CONFIDENCE[intervention_choice]
-
-            wif_input = input_data[feature_cols].copy()
-            wif_input['first_meaningful_intervention'] = intervention_choice
-            wif_input['first_meaningful_intervention'] = wif_input['first_meaningful_intervention'].astype('category')
-
-            wif_features = list(feature_cols) + ['first_meaningful_intervention']
-            proba_wif = model_whatif.predict_proba(wif_input[wif_features])[0][1]
-            delta = proba_wif - proba
-            delta_str = f"{delta:+.1%}"
-
-            col_base, col_sim = st.columns(2)
-            with col_base:
-                st.metric("Base risk (no intervention)", f"{proba:.1%}")
-            with col_sim:
-                st.metric(
-                    f"Simulated risk ({intervention_choice})",
-                    f"{proba_wif:.1%}",
-                    delta=delta_str,
-                    delta_color="inverse"
-                )
-
-            st.caption(f"{emoji} **{confidence_label}**")
-
-            if emoji == '🔴':
-                st.warning("⚠️ Low confidence — very few historical cases. Interpret with caution.")
-
-            st.caption(
-                "⚠️ **Association, not causation.** This simulation is based on clients who historically "
-                "received this intervention. It does not predict the causal effect of assigning it now."
-            )
