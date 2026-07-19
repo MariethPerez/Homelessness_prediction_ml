@@ -67,12 +67,16 @@ waterloo_homelessness_ml/
 │   ├── 02_baseline_model.ipynb             ← Model 1: LightGBM training + Optuna + SHAP
 │   ├── 03_fairness_audit.ipynb             ← Fairness evaluation by demographic group
 │   ├── 04_intervention_explainability.ipynb ← Model 2: Kaplan-Meier + retrospective LightGBM
-│   └── 05_whatif_model.ipynb               ← Model What-if: intervention simulation
+│   ├── 05_whatif_model.ipynb               ← Model What-if: intervention simulation
+│   └── 06_intervention_outcomes.ipynb      ← Intervention trajectory analysis for PECH
 │
 ├── src/
 │   ├── config.py                           ← Feature lists, mappings, constants
 │   ├── data_loader.py                      ← Load CAM data, apply cut-off filter
 │   └── feature_engineering.py             ← Build features, derive targets, encode
+│
+├── reports/
+│   └── phase_b_report.html                 ← Phase B report (model + intervention outcomes)
 │
 └── models/                                 ← NOT included in this repository
     ├── phase_a_baseline_*.pkl              ← Phase A model (April 2026)
@@ -172,6 +176,7 @@ jupyter notebook
 | 3 | `03_fairness_audit.ipynb` | Fairness report |
 | 4 | `04_intervention_explainability.ipynb` | KM curves, SHAP, permutation importance |
 | 5 | `05_whatif_model.ipynb` | Intervention simulation — in development |
+| 6 | `06_intervention_outcomes.ipynb` | Intervention trajectory analysis for PECH |
 
 ### Run the app
 
@@ -275,6 +280,18 @@ Use these to verify the app is working correctly. All clients are from the post-
 **Critical check:** Indigenous clients do NOT have the highest False Negative Rate.
 
 > ⚠️ Higher chronic rates among Indigenous clients reflect **systemic inequity**, not individual risk factors. This note is displayed in the app for every Indigenous client assessed.
+
+---
+
+## Key Findings from Intervention Outcomes Analysis (Notebook 06)
+
+Descriptive trajectory analysis comparing high-risk clients (Model 1 score > 0.50) who avoided chronic homelessness vs those who became chronic. Base: 3,850 high-risk clients — 1,147 never became chronic (29.8%), 2,703 did (70.2%).
+
+- **Goods and Services signal:** appears +9 percentage points more at intake (28.9% vs 19.9%) and +11 points at last recorded intervention (31.3% vs 20.2%) in clients who never became chronic
+- **Case Management and selection bias:** more frequent in clients who became chronic, but mean risk score (0.869) is the highest of all interventions — caseworkers assign it to the most vulnerable cases, not because it is harmful
+- **Trajectory:** clients who became chronic had more snapshots and more intervention changes, consistent with longer and more complex cases
+
+> ⚠️ All findings are **descriptive associations, not causal evidence**. Observational data cannot prove that any intervention caused a better or worse outcome.
 
 ---
 
